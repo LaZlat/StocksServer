@@ -2,18 +2,9 @@ const express = require("express");
 const db = require('../db')
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const session = require('express-session');
+const jwt = require("jsonwebtoken");
 
 const saltRounds = 10;
-
-router.get('/signin', (req, res) => {
-    console.log(req)
-    if (req.session.user) {
-        res.send({loggedIn: true, user: req.session.user})
-    } else {
-        res.send({user: req.session.user})
-    }
-})
 
 router.post('/signin', (req, res) => {
 
@@ -30,15 +21,26 @@ router.post('/signin', (req, res) => {
             if (result.length > 0) {
                 bcrypt.compare(password, result[0].password, (err, comp) => {
                     if (comp) {
-                        req.session.user = result;
-                        res.send({re: 1});
+                        
+                        const token = jwt.sign(
+                            {user: result[0].email},
+                            "SECRET",
+                            {
+                                expiresIn: "2h",
+                            }
+                        );
+                        const user = {
+                            email: result[0].email,
+                            token: token
+                        }
+                        res.status(200).json(user);
                     } else {
-                        res.send({re: 0});
+                        res.status(404);
                     }
                 })
                 
             } else {
-                res.send({re: 0}); 
+                res.status(404); 
             }
         
         }

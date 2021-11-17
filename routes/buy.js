@@ -51,6 +51,7 @@ router.post('/buycrypto', (req, res) => {
     const price = req.body.price;
     const currency = req.body.currency;
     const volume = req.body.volume;
+    const name = req.body.name;
 
     db.query(
         "SELECT amount FROM cash WHERE currecny = ? AND user = ?",
@@ -67,8 +68,8 @@ router.post('/buycrypto', (req, res) => {
                     }
                 )
                 db.query(
-                    "INSERT INTO crypto_holdings (user, cid, volume) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE volume = volume + ?",
-                    [uid, cid, volume, volume],
+                    "INSERT INTO crypto_holdings (user, cid, volume, name) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE volume = volume + ?",
+                    [uid, cid, volume, name, volume],
                     (err, r) => {
                         if (err) {
                             console.log(err);
