@@ -16,11 +16,13 @@ app.use(express.json());
 
 const signRoutes = require('./routes/sign');
 const buyRoutes = require('./routes/buy');
+const sellRoutes = require('./routes/sell');
 const authRoutes = require('./routes/auth');
 const portRoutes = require('./routes/portfolio');
 
 app.use('/', signRoutes);
 app.use('/buy', buyRoutes);
+app.use('/sell', sellRoutes);
 app.use('/auth', authRoutes);
 app.use('/port', portRoutes);
 

@@ -62,7 +62,7 @@ router.get('/availablestock', (req, res) => {
                     if (err || result[0] == null) {
                         res.sendStatus(404);
                     } else {
-                        res.send(result[0]);   
+                        res.send(result);   
                     }
                 });
         }
