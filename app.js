@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors')
+const Axios = require('axios')
 
 const app = express();
 
@@ -19,11 +20,17 @@ const buyRoutes = require('./routes/buy');
 const sellRoutes = require('./routes/sell');
 const authRoutes = require('./routes/auth');
 const portRoutes = require('./routes/portfolio');
+const autoRoutes = require('./routes/auto');
+
 
 app.use('/', signRoutes);
 app.use('/buy', buyRoutes);
 app.use('/sell', sellRoutes);
 app.use('/auth', authRoutes);
 app.use('/port', portRoutes);
+app.use('/auto', autoRoutes);
+
+
+
 
 module.exports = app
