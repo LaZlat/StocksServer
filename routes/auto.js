@@ -529,5 +529,46 @@ db.query(
     )
   }, 60 * 10000);*/
 
+  router.get('/generatecsv', (req, res) => {
+    const email = req.query.email;
+    const token = req.query.token;
+
+    jwt.verify(token, "SECRET", function (err, payload) {
+        if (err) {
+            res.sendStatus(404);
+        } else {
+            console.log("|AAAA")
+
+            db.query(
+                "SELECT name, volume, price, sell, status FROM crypto_autos WHERE user = (SELECT id FROM users WHERE email = ?) UNION ALL SELECT symbol as name, volume, price, sell, status FROM stock_autos WHERE user = (SELECT id FROM users WHERE email = ?)",
+                [email, email],
+                (err, result) => {
+                    if (err || result[0] == null) {
+                        res.sendStatus(404);
+                    } else {
+                        let csv;
+
+                        csv = "name,volume,price,sell,status" + '\r\n';
+                        
+                        for(let i = 0; i < result.length; i++){
+                            let keysAmount = Object.keys(result[i]).length
+                            let keysCounter = 0
+                    
+                               for(let key in result[i]){
+                                   csv += result[i][key] + (keysCounter+1 < keysAmount ? ',' : '\r\n' )
+                                   keysCounter++
+                               }
+                            
+                        
+                            keysCounter = 0
+                        }
+
+                        res.send(csv);
+                    }
+                }
+            );
+        }
+    })
+});
 
 module.exports = router;

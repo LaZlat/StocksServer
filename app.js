@@ -21,6 +21,7 @@ const sellRoutes = require('./routes/sell');
 const authRoutes = require('./routes/auth');
 const portRoutes = require('./routes/portfolio');
 const autoRoutes = require('./routes/auto');
+const settRoutes = require('./routes/sett');
 
 
 app.use('/', signRoutes);
@@ -29,6 +30,7 @@ app.use('/sell', sellRoutes);
 app.use('/auth', authRoutes);
 app.use('/port', portRoutes);
 app.use('/auto', autoRoutes);
+app.use('/sett', settRoutes)
 
 
 
