@@ -6,12 +6,11 @@ router.post('/buystock', (req, res) => {
     const uid = req.body.uid;
     const symbol = req.body.symbol;
     const price = req.body.price;
-    const currency = req.body.currency;
     const volume = req.body.volume;
 
     db.query(
-        "SELECT amount FROM cash WHERE currecny = ? AND user = (SELECT id FROM users WHERE email = ?)",
-        [currency, uid],
+        "SELECT amount FROM cash WHERE user = (SELECT id FROM users WHERE email = ?)",
+        [uid],
         (err, result) => {
             if (price * volume < result[0].amount) {
                 db.query(
@@ -42,16 +41,18 @@ router.post('/buystock', (req, res) => {
 });
 
 router.post('/buycrypto', (req, res) => {
+
+    console.log(req.body)
+
     const uid = req.body.uid;
     const cid = req.body.cid;
     const price = req.body.price;
-    const currency = req.body.currency;
     const volume = req.body.volume;
     const name = req.body.name;
 
     db.query(
-        "SELECT amount FROM cash WHERE currecny = ? AND user = (SELECT id FROM users WHERE email = ?)",
-        [currency, uid],
+        "SELECT amount FROM cash WHERE user = (SELECT id FROM users WHERE email = ?)",
+        [uid],
         (err, result) => {
             if (price * volume < result[0].amount) {
                 db.query(

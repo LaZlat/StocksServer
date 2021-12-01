@@ -78,8 +78,6 @@ router.get('/generatecsv', (req, res) => {
         if (err) {
             res.sendStatus(404);
         } else {
-            console.log("|AAAA")
-
             db.query(
                 "SELECT name, volume FROM crypto_holdings WHERE user = (SELECT id FROM users WHERE email = ?) UNION ALL SELECT symbol as name, volume FROM stock_holdings WHERE user = (SELECT id FROM users WHERE email = ?) UNION ALL SELECT currecny as name, amount as volume FROM cash WHERE user = (SELECT id FROM users WHERE email = ?)",
                 [email, email, email],
