@@ -13,10 +13,11 @@ var transporter = nodemailer.createTransport({
     }
 });
 
-var sendEmail = function (text) {
+
+var sendEmail = function (text, email) {
     transporter.sendMail({
         from: 'elektroniniaimainai@gmail.com', // sender address 
-        to: 'lazlatkus@gmail.com', // list of receivers 
+        to: email, // list of receivers 
         cc: '',
         subject: 'Jusu ' + text + 'sandoris ivykdytas', // Subject line 
         text: 'Katik buvo ivykdytas jusu ' + text + ' automatinio pirkimo sandoris. Placiau suzinokite apsilanke ir prisijunge i elektroniaimainai.lt', // plaintext body 
@@ -53,7 +54,7 @@ router.post('/sellcrypto', (req, res) => {
                         if (err) {
                             console.log(err);
                         } else {
-                            res.send({msg: "pavyko"});
+                            res.send({msg: "Pardavimas sukurtas"});
                         }
                     }
                 )
@@ -67,7 +68,7 @@ router.post('/sellcrypto', (req, res) => {
                     }
                 )
             } else {
-                res.send({msg: "Nepakanka crypto"})
+                res.send({msg: "Nepakanka virtualių valiutų"})
             }
         }
     );
@@ -92,7 +93,7 @@ router.post('/sellstock', (req, res) => {
                         if (err) {
                             console.log(err);
                         } else {
-                            res.send({msg: "pavyko"});
+                            res.send({msg: "Pardavimas sukurtas"});
                         }
                     }
                 )
@@ -106,7 +107,7 @@ router.post('/sellstock', (req, res) => {
                     }
                 )
             } else {
-                res.send({msg: "Nepakanka stock"})
+                res.send({msg: "Nepakanka vertybinių popierių"})
             }
         }
     );
@@ -133,7 +134,7 @@ router.post('/buycrypto', (req, res) => {
                         if (err) {
                             console.log(err);
                         } else {
-                            res.send({msg: "pavyko"});
+                            res.send({msg: "Pirkimas sukurtas"});
                         }
                     }
                 )
@@ -147,7 +148,7 @@ router.post('/buycrypto', (req, res) => {
                     }
                 )
             } else {
-                res.send({msg: "Nepakanka lesu"})
+                res.send({msg: "Nepakanka lešų"})
             }
         }
     );
@@ -172,7 +173,7 @@ router.post('/buystock', (req, res) => {
                         if (err) {
                             console.log(err);
                         } else {
-                            res.send({msg: "pavyko"});
+                            res.send({msg: "Pirkimas sukurtas"});
                         }
                     }
                 )
@@ -186,7 +187,7 @@ router.post('/buystock', (req, res) => {
                     }
                 )
             } else {
-                res.send({msg: "Nepakanka lesu"})
+                res.send({msg: "Nepakanka lešų"})
             }
         }
     );
@@ -197,10 +198,12 @@ router.get('/availablecryptoautos', (req, res) => {
     const email = req.query.email;
     const token = req.query.token;
 
+    const decodedToken = jwt.decode(req.query.token)
+
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else {
+        } else if(email == decodedToken.user) {
             db.query(
                 "SELECT id, name, volume, price, sell, status FROM crypto_autos WHERE user = (SELECT id FROM users WHERE email = ?)",
                 [email],
@@ -220,13 +223,15 @@ router.get('/availablestockautos', (req, res) => {
     const email = req.query.email;
     const token = req.query.token;
 
+    const decodedToken = jwt.decode(req.query.token)
+
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else {
+        } else if(email == decodedToken.user) {
             db.query(
                 "SELECT id, symbol, volume, price, sell, status FROM stock_autos WHERE user = (SELECT id FROM users WHERE email = ?)",
-                [email],
+                [email.user],
                 (err, result) => {
                     if (err || result[0] == null) {
                         res.sendStatus(404);
@@ -241,7 +246,7 @@ router.get('/availablestockautos', (req, res) => {
 
 router.post('/deleteautocrypto', (req, res) => {
     const deleteId = req.body.deleteId;
-    console.log(req.body)
+
     db.query(
         "SELECT cid, volume, price, sell, user, status from crypto_autos WHERE id = ?",
         [deleteId],
@@ -284,7 +289,7 @@ router.post('/deleteautocrypto', (req, res) => {
 
 router.post('/deleteautostock', (req, res) => {
     const deleteId = req.body.deleteId;
-    console.log(req.body)
+
     db.query(
         "SELECT symbol, volume, price, sell, user, status from stock_autos WHERE id = ?",
         [deleteId],
@@ -410,7 +415,17 @@ db.query(
                                 }
                             }
                         )
-                        sendEmail(e.name);
+                        db.query(
+                            "SELECT email FROM users WHERE id = ?",
+                            [cryptoAutos[a].user],
+                            (err, result) =>{
+                                if (err) {
+                                    console.log(err)
+                                } else {
+                                    sendEmail(e.name, result[0].email);
+                                }
+                            }
+                        )
                     }
                 } else {
                     if(cryptoAutos[a].price >= e.price) {
@@ -433,7 +448,17 @@ db.query(
                                 }
                             }
                         )
-                        sendEmail(e.name);
+                        db.query(
+                            "SELECT email FROM users WHERE id = ?",
+                            [cryptoAutos[a].user],
+                            (err, result) =>{
+                                if (err) {
+                                    console.log(err)
+                                } else {
+                                    sendEmail(e.name, result[0].email);
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -464,7 +489,17 @@ db.query(
                                 }
                             }
                         )
-                        sendEmail(e.symbol);
+                        db.query(
+                            "SELECT email FROM users WHERE id = ?",
+                            [stockAutos[a].user],
+                            (err, result) =>{
+                                if (err) {
+                                    console.log(err)
+                                } else {
+                                    sendEmail(e.symbol, result[0].email);
+                                }
+                            }
+                        )
 
                     }
                 } else {
@@ -489,7 +524,18 @@ db.query(
                             }
                         )
                     }
-                    sendEmail(e.symbol);
+                    db.query(
+                            "SELECT email FROM users WHERE id = ?",
+                            [stockAutos[a].user],
+                            (err, result) =>{
+                                if (err) {
+                                    console.log(err)
+                                } else {
+                                    sendEmail(e.symbol, result[0].email);
+                                }
+                            }
+                        )
+
                 }
             }
         })
@@ -533,11 +579,12 @@ db.query(
     const email = req.query.email;
     const token = req.query.token;
 
+    const decodedToken = jwt.decode(req.query.token)
+
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else {
-            console.log("|AAAA")
+        } else if (email == decodedToken.user) {
 
             db.query(
                 "SELECT name, volume, price, sell, status FROM crypto_autos WHERE user = (SELECT id FROM users WHERE email = ?) UNION ALL SELECT symbol as name, volume, price, sell, status FROM stock_autos WHERE user = (SELECT id FROM users WHERE email = ?)",

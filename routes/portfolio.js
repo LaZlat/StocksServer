@@ -7,10 +7,12 @@ router.get('/availablecash', (req, res) => {
     const email = req.query.email;
     const token = req.query.token;
 
+    const decodedToken = jwt.decode(req.query.token);
+
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else {
+        } else if(email == decodedToken.user) {
             db.query(
                 "SELECT amount, currecny FROM cash WHERE user = (SELECT id FROM users WHERE email = ?)",
                 [email],
@@ -29,10 +31,12 @@ router.get('/availablecrypto', (req, res) => {
     const email = req.query.email;
     const token = req.query.token;
 
+    const decodedToken = jwt.decode(req.query.token);
+
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else {
+        } else if(email == decodedToken.user) {
             db.query(
                 "SELECT name, cid, volume FROM crypto_holdings WHERE user = (SELECT id FROM users WHERE email = ?)",
                 [email],
@@ -51,10 +55,12 @@ router.get('/availablestock', (req, res) => {
     const email = req.query.email;
     const token = req.query.token;
 
+    const decodedToken = jwt.decode(req.query.token);
+
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else {
+        } else if(email == decodedToken.user) {
             db.query(
                 "SELECT symbol, volume FROM stock_holdings WHERE user = (SELECT id FROM users WHERE email = ?)",
                 [email],
@@ -74,10 +80,12 @@ router.get('/generatecsv', (req, res) => {
     const email = req.query.email;
     const token = req.query.token;
 
+    const decodedToken = jwt.decode(req.query.token);
+
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else {
+        } else if(email == decodedToken.user) {
             db.query(
                 "SELECT name, volume FROM crypto_holdings WHERE user = (SELECT id FROM users WHERE email = ?) UNION ALL SELECT symbol as name, volume FROM stock_holdings WHERE user = (SELECT id FROM users WHERE email = ?) UNION ALL SELECT currecny as name, amount as volume FROM cash WHERE user = (SELECT id FROM users WHERE email = ?)",
                 [email, email, email],

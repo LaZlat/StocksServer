@@ -19,9 +19,9 @@ router.post('/pass', (req, res) => {
             [hash, email],
             (err, result) => {
                 if (err) {
-                    res.send({err});
+                    res.status(404).send('Not found')
                 } else {
-                    res.status(200)
+                    res.status(200).send('OK')
                 } 
             
             }
@@ -39,9 +39,9 @@ router.post('/email', (req, res) => {
         [email, oldEmail],
         (err, result) => {
             if (err) {
-                res.send({err});
+                res.status(404).send('Not found')
             } else {
-                res.status(200).json(email);
+                res.status(200).send(email);
             }
         }
     );
@@ -110,7 +110,7 @@ router.post('/refresh', (req, res) => {
         }
     );
 
-    res.status(200);
+    res.status(200).send('OK');
 })
 
 

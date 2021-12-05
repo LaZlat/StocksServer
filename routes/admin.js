@@ -4,13 +4,13 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 
 router.post('/users', (req, res) => {
-    const owner = req.body.owner;
+    const owner = jwt.decode(req.body.token)
     const token = req.body.token;
 
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else if (owner == 'admin@admin.com') {
+        } else if (owner.user == 'admin@admin.com') {
             db.query(
             "SELECT u.name, u.email, c.amount FROM users u INNER JOIN cash c where u.id = c.user",
             (err, result) => {
@@ -25,14 +25,14 @@ router.post('/users', (req, res) => {
 });
 
 router.post('/removeuser', (req, res) => {
-    const owner = req.body.owner;
+    const owner = jwt.decode(req.body.token)
     const token = req.body.token;
     const email = req.body.email
 
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else if (owner === 'admin@admin.com') {
+        } else if (owner.user === 'admin@admin.com') {
 
             db.query(
                 "DELETE FROM crypto_holdings WHERE user = (SELECT id FROM users WHERE email = ?)",
@@ -111,14 +111,14 @@ router.post('/removeuser', (req, res) => {
 });
 
 router.post('/restartuser', (req, res) => {
-    const owner = req.body.owner;
+    const owner = jwt.decode(req.body.token)
     const token = req.body.token;
     const email = req.body.email
 
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else if (owner === 'admin@admin.com') {
+        } else if (owner.user === 'admin@admin.com') {
 
             db.query(
                 "DELETE FROM crypto_holdings WHERE user = (SELECT id FROM users WHERE email = ?)",

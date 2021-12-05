@@ -29,20 +29,18 @@ router.post('/buystock', (req, res) => {
                         if (err) {
                             console.log(err);
                         } else {
-                            res.send({msg: "pavyko"});
+                            res.send({msg: "Vertybiniai popieriai nupirkti"});
                         }
                     }
                 )
             } else {
-                res.send({msg: "Nepakanka lesu"})
+                res.send({msg: "Nepakanka lėšų"})
             }
         }
     );
 });
 
 router.post('/buycrypto', (req, res) => {
-
-    console.log(req.body)
 
     const uid = req.body.uid;
     const cid = req.body.cid;
@@ -71,12 +69,12 @@ router.post('/buycrypto', (req, res) => {
                         if (err) {
                             console.log(err);
                         } else {
-                            res.send({msg: "pavyko"});
+                            res.send({msg: "Virtualios valiutos nupirktos"});
                         }
                     }
                 )
             } else {
-                res.send({msg: "Nepakanka lesu"})
+                res.send({msg: "Nepakanka lešų"})
             }
         }
     );

@@ -6,15 +6,15 @@ const jwt = require("jsonwebtoken");
 router.get('/', (req, res) => {
     jwt.verify(req.query.token, "SECRET", function (err, payload) {
         if (err) {
-            res.sendStatus(404);
+            res.status(404).send('Not Found')
         } else if (payload != null) {
             if (payload.user == req.query.email) {
-                res.sendStatus(200);
+                res.status(200).send('OK');
             } else {
-            res.sendStatus(404);
+                res.status(404).send('Not Found')
             }
         } else {
-            res.sendStatus(404);
+            res.status(404).send('Not Found')
         }
     });
 });
@@ -23,15 +23,16 @@ router.get('/', (req, res) => {
 router.get('/admin', (req, res) => {
     jwt.verify(req.query.token, "SECRET", function (err, payload) {
         if (err) {
-            res.sendStatus(404);
+            res.status(404).send('Not Found')
         } else if (payload != null) {
-            if ('admin@admin.com' == req.query.email) {
-                res.sendStatus(200);
+            const token = jwt.decode(req.query.token)
+            if ('admin@admin.com' == token.user) {
+                res.status(200).send('OK');
             } else {
-            res.sendStatus(404);
+                res.status(404).send('Not Found')
             }
         } else {
-            res.sendStatus(404);
+            res.status(404).send('Not Found')
         }
     });
 });

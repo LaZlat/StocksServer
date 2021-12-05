@@ -29,12 +29,12 @@ router.post('/sellcrypto', (req, res) => {
                         if (err) {
                             console.log(err);
                         } else {
-                            res.send({msg: "pavyko"});
+                            res.send({msg: "Virtualios valiutos parduotos"});
                         }
                     }
                 )
             } else {
-                res.send({msg: "Nepakanka crypto"})
+                res.send({msg: "Nepakanka virtualių valiutų"})
             }
         }
     );
@@ -67,12 +67,12 @@ router.post('/sellstock', (req, res) => {
                         if (err) {
                             console.log(err);
                         } else {
-                            res.send({msg: "pavyko"});
+                            res.send({msg: "Vertybiniai poperiai parduoti"});
                         }
                     }
                 )
             } else {
-                res.send({msg: "Nepakanka crypto"})
+                res.send({msg: "Nepakanka vertybinių popierių"})
             }
         }
     );

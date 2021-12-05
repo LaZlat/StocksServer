@@ -57,7 +57,8 @@ router.post('/signin', (req, res) => {
                         );
                         const user = {
                             email: result[0].email,
-                            token: token
+                            token: token,
+                            name: result[0].name
                         }
                         res.status(200).send(user);
                     } else {
