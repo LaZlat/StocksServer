@@ -2,6 +2,7 @@ const express = require("express");
 const db = require('../db')
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
 
 const saltRounds = 10;
 
@@ -32,11 +33,11 @@ router.post('/pass', (req, res) => {
 
 router.post('/email', (req, res) => {
     const email = req.body.email;
-    const oldEmail = req.body.oldEmail;
+    const oldEmail = jwt.decode(req.body.token);
 
     db.query(
         "UPDATE users SET email = ? WHERE email = ?",
-        [email, oldEmail],
+        [email, oldEmail.user],
         (err, result) => {
             if (err) {
                 res.status(404).send('Not found')
@@ -48,11 +49,11 @@ router.post('/email', (req, res) => {
 })
 
 router.post('/refresh', (req, res) => {
-    const email = req.body.email;
+    const email = jwt.decode(req.body.token);
 
     db.query(
         "UPDATE cash SET amount = '10000' WHERE email = (SELECT id FROM users WHERE email = ?)",
-        [email],
+        [email.user],
         (err, result) => {
             if (err) {
                 console.log(err)
@@ -64,7 +65,7 @@ router.post('/refresh', (req, res) => {
 
     db.query(
         "DELETE FROM crypto_holdings WHERE user = (SELECT id FROM users WHERE email = ?)",
-        [email],
+        [email.user],
         (err, result) => {
             if (err) {
                 console.log(err)
@@ -76,7 +77,7 @@ router.post('/refresh', (req, res) => {
 
     db.query(
         "DELETE FROM stock_holdings WHERE user = (SELECT id FROM users WHERE email = ?)",
-        [email],
+        [email.user],
         (err, result) => {
             if (err) {
                 console.log(err)
@@ -88,7 +89,7 @@ router.post('/refresh', (req, res) => {
 
     db.query(
         "DELETE FROM stock_autos WHERE user = (SELECT id FROM users WHERE email = ?)",
-        [email],
+        [email.user],
         (err, result) => {
             if (err) {
                 console.log(err)
@@ -100,7 +101,7 @@ router.post('/refresh', (req, res) => {
 
     db.query(
         "DELETE FROM crypto_autos WHERE user = (SELECT id FROM users WHERE email = ?)",
-        [email],
+        [email.user],
         (err, result) => {
             if (err) {
                 console.log(err)

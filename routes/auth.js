@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 
 
 router.get('/', (req, res) => {
+
     jwt.verify(req.query.token, "SECRET", function (err, payload) {
         if (err) {
             res.status(404).send('Not Found')

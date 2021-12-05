@@ -35,21 +35,21 @@ var sendEmail = function (text, email) {
 
 
 router.post('/sellcrypto', (req, res) => {
-    const uid = req.body.uid;
     const cid = req.body.cid;
     const price = req.body.price;
     const volume = req.body.volume;
     const sell = req.body.sell
     const name = req.body.name;
+    const decodedToken = jwt.decode(req.body.token)
 
     db.query(
         "SELECT volume FROM crypto_holdings WHERE cid = ? AND user = (SELECT id FROM users WHERE email = ?)",
-        [cid, uid],
+        [cid, decodedToken.user],
         (err, result) => {
             if (volume <= result[0].volume) {
                 db.query(
                     "UPDATE crypto_holdings SET volume = (volume - ?) WHERE cid = ? AND user = (SELECT id FROM users WHERE email = ?)",
-                    [volume, cid, uid],
+                    [volume, cid, decodedToken.user],
                     (err, r) => {
                         if (err) {
                             console.log(err);
@@ -60,7 +60,7 @@ router.post('/sellcrypto', (req, res) => {
                 )
                 db.query(
                     "INSERT INTO crypto_autos (cid, volume, price, user, sell, status) VALUES (?, ?, ?, (SELECT id FROM users WHERE email = ?), ?, ?)",
-                    [cid, volume, price, uid, sell, "Aktyvus"],
+                    [cid, volume, price, decodedToken.user, sell, "Aktyvus"],
                     (err, result) => {
                         if (err) {
                             console.log(err);
@@ -75,20 +75,20 @@ router.post('/sellcrypto', (req, res) => {
 });
 
 router.post('/sellstock', (req, res) => {
-    const uid = req.body.uid;
     const symbol = req.body.symbol;
     const price = req.body.price;
     const volume = req.body.volume;
     const sell = req.body.sell
+    const decodedToken = jwt.decode(req.body.token)
 
     db.query(
         "SELECT volume FROM stock_holdings WHERE symbol = ? AND user = (SELECT id FROM users WHERE email = ?)",
-        [symbol, uid],
+        [symbol, decodedToken.user],
         (err, result) => {
             if (volume <= result[0].volume) {
                 db.query(
                     "UPDATE stock_holdings SET volume = (volume - ?) WHERE symbol = ? AND user = (SELECT id FROM users WHERE email = ?)",
-                    [volume, symbol, uid],
+                    [volume, symbol, decodedToken.user],
                     (err, r) => {
                         if (err) {
                             console.log(err);
@@ -99,7 +99,7 @@ router.post('/sellstock', (req, res) => {
                 )
                 db.query(
                     "INSERT INTO stock_autos (symbol, volume, price, user, sell, status) VALUES (?, ?, ?, (SELECT id FROM users WHERE email = ?), ?, ?)",
-                    [symbol, volume, price, uid, sell, "Aktyvus"],
+                    [symbol, volume, price, decodedToken.user, sell, "Aktyvus"],
                     (err, result) => {
                         if (err) {
                             console.log(err);
@@ -114,22 +114,22 @@ router.post('/sellstock', (req, res) => {
 });
 
 router.post('/buycrypto', (req, res) => {
-    const uid = req.body.uid;
     const cid = req.body.cid;
     const price = req.body.price;
     const volume = req.body.volume;
     const sell = req.body.sell;
     const name = req.body.name;
+    const decodedToken = jwt.decode(req.body.token)
 
     db.query(
         "SELECT amount FROM cash WHERE user = (SELECT id FROM users WHERE email = ?)",
-        [uid],
+        [decodedToken.user],
         (err, result) => {
             if ((price * volume) < result[0].amount) {
 
                 db.query(
                     "UPDATE cash SET amount = ? WHERE user = (SELECT id FROM users WHERE email = ?)",
-                    [(result[0].amount-(price*volume)), uid],
+                    [(result[0].amount-(price*volume)), decodedToken.user],
                     (err, result) => {
                         if (err) {
                             console.log(err);
@@ -140,7 +140,7 @@ router.post('/buycrypto', (req, res) => {
                 )
                 db.query(
                     "INSERT INTO crypto_autos (cid, volume, price, user, sell, status, name) VALUES (?, ?, ?, (SELECT id FROM users WHERE email = ?), ?, ?, ?)",
-                    [cid, volume, price, uid, sell, "Aktyvus", name],
+                    [cid, volume, price, decodedToken.user, sell, "Aktyvus", name],
                     (err, result) => {
                         if (err) {
                             console.log(err);
@@ -155,20 +155,20 @@ router.post('/buycrypto', (req, res) => {
 });
 
 router.post('/buystock', (req, res) => {
-    const uid = req.body.uid;
     const symbol = req.body.symbol;
     const price = req.body.price;
     const volume = req.body.volume;
-    const sell = req.body.sell
+    const sell = req.body.sell;
+    const decodedToken = jwt.decode(req.body.token)
 
     db.query(
         "SELECT amount FROM cash WHERE user = (SELECT id FROM users WHERE email = ?)",
-        [uid],
+        [decodedToken.user],
         (err, result) => {
             if (price * volume < result[0].amount) {
                 db.query(
                     "UPDATE cash SET amount = ? WHERE user = (SELECT id FROM users WHERE email = ?)",
-                    [(result[0].amount-(volume* price)), uid],
+                    [(result[0].amount-(volume* price)), decodedToken.user],
                     (err, result) => {
                         if (err) {
                             console.log(err);
@@ -179,7 +179,7 @@ router.post('/buystock', (req, res) => {
                 )
                 db.query(
                     "INSERT INTO stock_autos (symbol, volume, price, user, sell, status) VALUES (?, ?, ?, (SELECT id FROM users WHERE email = ?), ?, ?)",
-                    [symbol, volume, price, uid, sell, "Aktyvus"],
+                    [symbol, volume, price, decodedToken, sell, "Aktyvus"],
                     (err, result) => {
                         if (err) {
                             console.log(err);
@@ -203,10 +203,10 @@ router.get('/availablecryptoautos', (req, res) => {
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else if(email == decodedToken.user) {
+        } else {
             db.query(
                 "SELECT id, name, volume, price, sell, status FROM crypto_autos WHERE user = (SELECT id FROM users WHERE email = ?)",
-                [email],
+                [decodedToken.user],
                 (err, result) => {
                     if (err || result[0] == null) {
                         res.sendStatus(404);
@@ -228,10 +228,10 @@ router.get('/availablestockautos', (req, res) => {
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else if(email == decodedToken.user) {
+        } else {
             db.query(
                 "SELECT id, symbol, volume, price, sell, status FROM stock_autos WHERE user = (SELECT id FROM users WHERE email = ?)",
-                [email.user],
+                [decodedToken.user],
                 (err, result) => {
                     if (err || result[0] == null) {
                         res.sendStatus(404);
@@ -584,11 +584,11 @@ db.query(
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else if (email == decodedToken.user) {
+        } else {
 
             db.query(
                 "SELECT name, volume, price, sell, status FROM crypto_autos WHERE user = (SELECT id FROM users WHERE email = ?) UNION ALL SELECT symbol as name, volume, price, sell, status FROM stock_autos WHERE user = (SELECT id FROM users WHERE email = ?)",
-                [email, email],
+                [decodedToken.user, decodedToken.user],
                 (err, result) => {
                     if (err || result[0] == null) {
                         res.sendStatus(404);

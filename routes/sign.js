@@ -78,9 +78,6 @@ router.post('/signup', (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    console.log("2")
-
-
     bcrypt.hash(password, saltRounds, (err, hash) =>{
         if (err) {
             console.log(err);

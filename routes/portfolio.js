@@ -4,18 +4,16 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 
 router.get('/availablecash', (req, res) => {
-    const email = req.query.email;
     const token = req.query.token;
-
     const decodedToken = jwt.decode(req.query.token);
 
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else if(email == decodedToken.user) {
+        } else {
             db.query(
                 "SELECT amount, currecny FROM cash WHERE user = (SELECT id FROM users WHERE email = ?)",
-                [email],
+                [decodedToken.user],
                 (err, result) => {
                     if (err || result[0] == null) {
                         res.sendStatus(404);
@@ -28,18 +26,16 @@ router.get('/availablecash', (req, res) => {
 });
 
 router.get('/availablecrypto', (req, res) => {
-    const email = req.query.email;
     const token = req.query.token;
-
     const decodedToken = jwt.decode(req.query.token);
 
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else if(email == decodedToken.user) {
+        } else {
             db.query(
                 "SELECT name, cid, volume FROM crypto_holdings WHERE user = (SELECT id FROM users WHERE email = ?)",
-                [email],
+                [decodedToken.user],
                 (err, result) => {
                     if (err || result[0] == null) {
                         res.sendStatus(404);
@@ -52,7 +48,6 @@ router.get('/availablecrypto', (req, res) => {
 });
 
 router.get('/availablestock', (req, res) => {
-    const email = req.query.email;
     const token = req.query.token;
 
     const decodedToken = jwt.decode(req.query.token);
@@ -60,10 +55,10 @@ router.get('/availablestock', (req, res) => {
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else if(email == decodedToken.user) {
+        } else {
             db.query(
                 "SELECT symbol, volume FROM stock_holdings WHERE user = (SELECT id FROM users WHERE email = ?)",
-                [email],
+                [decodedToken.user],
                 (err, result) => {
                     if (err || result[0] == null) {
                         res.sendStatus(404);
@@ -77,7 +72,6 @@ router.get('/availablestock', (req, res) => {
 });
 
 router.get('/generatecsv', (req, res) => {
-    const email = req.query.email;
     const token = req.query.token;
 
     const decodedToken = jwt.decode(req.query.token);
@@ -85,10 +79,10 @@ router.get('/generatecsv', (req, res) => {
     jwt.verify(token, "SECRET", function (err, payload) {
         if (err) {
             res.sendStatus(404);
-        } else if(email == decodedToken.user) {
+        } else {
             db.query(
                 "SELECT name, volume FROM crypto_holdings WHERE user = (SELECT id FROM users WHERE email = ?) UNION ALL SELECT symbol as name, volume FROM stock_holdings WHERE user = (SELECT id FROM users WHERE email = ?) UNION ALL SELECT currecny as name, amount as volume FROM cash WHERE user = (SELECT id FROM users WHERE email = ?)",
-                [email, email, email],
+                [decodedToken.user, decodedToken.user, decodedToken.user],
                 (err, result) => {
                     if (err || result[0] == null) {
                         res.sendStatus(404);
