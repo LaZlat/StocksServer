@@ -13,6 +13,10 @@ router.post('/sellcrypto', (req, res) => {
         "SELECT volume FROM crypto_holdings WHERE cid = ? AND user = (SELECT id FROM users WHERE email = ?)",
         [cid, decodedToken.user],
         (err, result) => {
+            if (result.length == 0) {
+                res.send({msg: "Nepakanka virtualių valiutų"})
+
+            }
             if (volume <= result[0].volume) {
                 db.query(
                     "UPDATE cash SET amount = (amount + ?) WHERE user = (SELECT id FROM users WHERE email = ?)",
@@ -52,6 +56,10 @@ router.post('/sellstock', (req, res) => {
         "SELECT volume FROM stock_holdings WHERE symbol = ? AND user = (SELECT id FROM users WHERE email = ?)",
         [symbol, decodedToken.user],
         (err, result) => {
+            if (result.length == 0) {
+                res.send({msg: "Nepakanka vertybinių popierių"})
+
+            }
             if (volume <= result[0].volume) {
                 db.query(
                     "UPDATE cash SET amount = (amount + ?) WHERE user = (SELECT id FROM users WHERE email = ?)",

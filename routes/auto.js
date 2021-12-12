@@ -46,6 +46,10 @@ router.post('/sellcrypto', (req, res) => {
         "SELECT volume FROM crypto_holdings WHERE cid = ? AND user = (SELECT id FROM users WHERE email = ?)",
         [cid, decodedToken.user],
         (err, result) => {
+            if (result.length == 0) {
+                res.send({msg: "Nepakanka virtualių valiutų"})
+
+            }
             if (volume <= result[0].volume) {
                 db.query(
                     "UPDATE crypto_holdings SET volume = (volume - ?) WHERE cid = ? AND user = (SELECT id FROM users WHERE email = ?)",
@@ -59,8 +63,8 @@ router.post('/sellcrypto', (req, res) => {
                     }
                 )
                 db.query(
-                    "INSERT INTO crypto_autos (cid, volume, price, user, sell, status) VALUES (?, ?, ?, (SELECT id FROM users WHERE email = ?), ?, ?)",
-                    [cid, volume, price, decodedToken.user, sell, "Aktyvus"],
+                    "INSERT INTO crypto_autos (cid, volume, price, user, sell, status, name) VALUES (?, ?, ?, (SELECT id FROM users WHERE email = ?), ?, ?, ?)",
+                    [cid, volume, price, decodedToken.user, sell, "Aktyvus", name],
                     (err, result) => {
                         if (err) {
                             console.log(err);
@@ -85,6 +89,10 @@ router.post('/sellstock', (req, res) => {
         "SELECT volume FROM stock_holdings WHERE symbol = ? AND user = (SELECT id FROM users WHERE email = ?)",
         [symbol, decodedToken.user],
         (err, result) => {
+            if (result.length == 0) {
+                res.send({msg: "Nepakanka vertybinių popierių"})
+
+            }
             if (volume <= result[0].volume) {
                 db.query(
                     "UPDATE stock_holdings SET volume = (volume - ?) WHERE symbol = ? AND user = (SELECT id FROM users WHERE email = ?)",
@@ -125,6 +133,9 @@ router.post('/buycrypto', (req, res) => {
         "SELECT amount FROM cash WHERE user = (SELECT id FROM users WHERE email = ?)",
         [decodedToken.user],
         (err, result) => {
+            if (result.length == 0) {
+                res.send({msg: "Nepakanka lešų"})
+            }
             if ((price * volume) < result[0].amount) {
 
                 db.query(
@@ -165,6 +176,9 @@ router.post('/buystock', (req, res) => {
         "SELECT amount FROM cash WHERE user = (SELECT id FROM users WHERE email = ?)",
         [decodedToken.user],
         (err, result) => {
+            if (result.length == 0) {
+                res.send({msg: "Nepakanka lešų"})
+            }
             if (price * volume < result[0].amount) {
                 db.query(
                     "UPDATE cash SET amount = ? WHERE user = (SELECT id FROM users WHERE email = ?)",

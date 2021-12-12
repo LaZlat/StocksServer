@@ -14,7 +14,11 @@ router.post('/buystock', (req, res) => {
         "SELECT amount FROM cash WHERE user = (SELECT id FROM users WHERE email = ?)",
         [decodedToken.user],
         (err, result) => {
-            if (price * volume < result[0].amount) {
+            if (result.length == 0) {
+                res.send({msg: "Nepakanka lėšų"})
+
+            }
+            else if (price * volume < result[0].amount) {
                 db.query(
                     "UPDATE cash SET amount = ? WHERE user = (SELECT id FROM users WHERE email = ?)",
                     [(result[0].amount-price), decodedToken.user],
@@ -53,7 +57,11 @@ router.post('/buycrypto', (req, res) => {
         "SELECT amount FROM cash WHERE user = (SELECT id FROM users WHERE email = ?)",
         [decodedToken.user],
         (err, result) => {
-            if (price * volume < result[0].amount) {
+            if (result.length == 0) {
+                res.send({msg: "Nepakanka lėšų"})
+
+            }
+            else if (price * volume < result[0].amount) {
                 db.query(
                     "UPDATE cash SET amount = ? WHERE user = (SELECT id FROM users WHERE email = ?)",
                     [(result[0].amount-price), decodedToken.user],
