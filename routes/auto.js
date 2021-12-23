@@ -193,7 +193,7 @@ router.post('/buystock', (req, res) => {
                 )
                 db.query(
                     "INSERT INTO stock_autos (symbol, volume, price, user, sell, status) VALUES (?, ?, ?, (SELECT id FROM users WHERE email = ?), ?, ?)",
-                    [symbol, volume, price, decodedToken, sell, "Aktyvus"],
+                    [symbol, volume, price, decodedToken.user, sell, "Aktyvus"],
                     (err, result) => {
                         if (err) {
                             console.log(err);
@@ -343,8 +343,9 @@ router.post('/deleteautostock', (req, res) => {
         }
     })
 })
-
-/*let cryptoData = "";
+// NUO CIA AUTO SUKASI
+/*
+let cryptoData = "";
 let cryptoAutos = "";
 let stockData = "";
 let stockAutos = "";
@@ -381,7 +382,7 @@ var options = {
   });
 
 db.query(
-    "SELECT id, cid, price, volume, user, sell, status from crypto_autos",
+    "SELECT id, cid, price, volume, user, sell, status, name from crypto_autos",
     (err, result) =>{
         if (err) {
             console.log(err)
@@ -397,7 +398,7 @@ db.query(
         if (err) {
             console.log(err)
         } else {
-            cryptoAutos = result;
+            stockAutos = result;
         }
     }
 )
@@ -410,6 +411,7 @@ db.query(
             if(cryptoAutos[a].cid == e.id && cryptoAutos[a].status == 'Aktyvus') {
                 if(cryptoAutos[a].sell == true ) {
                     if(cryptoAutos[a].price <= e.price) {
+
                         db.query(
                             "UPDATE cash SET amount = (amount + ?) WHERE user = ?",
                             [e.price * cryptoAutos[a].volume, cryptoAutos[a].user],
@@ -443,9 +445,10 @@ db.query(
                     }
                 } else {
                     if(cryptoAutos[a].price >= e.price) {
+
                         db.query(
-                            "UPDATE crypto_holdings SET volume = (volume + ?) WHERE user = ? AND cid = ?",
-                            [cryptoAutos[a].volume, cryptoAutos[a].user, cryptoAutos[a].cid],
+                            "INSERT INTO crypto_holdings (user, cid, volume, name) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE volume = volume + ?",
+                            [cryptoAutos[a].user, cryptoAutos[a].cid, cryptoAutos[a].volume, cryptoAutos[a].name, cryptoAutos[a].volume],
                             (err, result) =>{ 
                                 if (err) {
                                     console.log(err)
@@ -519,8 +522,8 @@ db.query(
                 } else {
                     if(stockAutos[a].price >= e.ask) {
                         db.query(
-                            "UPDATE stock_holdings SET volume = (volume + ?) WHERE user = ? AND symbol = ?",
-                            [stockAutos[a].volume, stockAutos[a].user, stockAutos[a].symbol],
+                            "INSERT INTO stock_holdings (user, symbol, volume) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE volume = volume + ?",
+                            [stockAutos[a].user, stockAutos[a].symbol, stockAutos[a].volume, stockAutos[a].volume],
                             (err, result) =>{ 
                                 if (err) {
                                     console.log(err)
@@ -568,7 +571,7 @@ db.query(
     });
                 
     db.query(
-        "SELECT id, cid, price, volume, user, sell, status from crypto_autos",
+        "SELECT id, cid, price, volume, user, sell, status, name from crypto_autos",
         (err, result) =>{
         if (err) {
             console.log(err)
@@ -587,7 +590,9 @@ db.query(
             }
         }
     )
-  }, 60 * 10000);*/
+  }, 60 * 10000);
+  */
+  //IKI CIA
 
   router.get('/generatecsv', (req, res) => {
     const email = req.query.email;
